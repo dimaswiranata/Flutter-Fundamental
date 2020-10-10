@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:my_first_flutter/cart.dart';
+import 'package:my_first_flutter/money.dart';
+// import 'package:my_first_flutter/application_color.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(MyApp());
@@ -10,54 +14,114 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String data = "QR Code Data";
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: Text("Custom Clipper"),),
-        body: Center(
-          child : ClipPath(
-            clipper: MyClipper(), // class untuk membentuk clip Image
-            child: Image(
-              width: 300,
-              image: NetworkImage(
-                "https://i.pinimg.com/originals/96/37/49/963749a76357028fd70e54bccacffcba.jpg"
+      home: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (context) => Money()),
+          ChangeNotifierProvider(create: (context) => Cart()),
+        ],
+        child: Scaffold(
+          floatingActionButton: Consumer<Money>(
+            builder:(context, money, _) => Consumer<Cart>(
+              builder:(context, cart, _) => FloatingActionButton( // FloatingActionButton biasanya di Scaffold
+                onPressed: () {
+                  if (money.balance >= 500){
+                    cart.quantity += 1;
+                    money.balance -= 500;
+                  }
+                },
+                child: Icon(Icons.add_shopping_cart),
+                backgroundColor: Colors.purple,
               ),
+            ),
+          ),
+          appBar: AppBar(
+            backgroundColor: Colors.purple,
+            title: Text("Multi Provider"),
+          ),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment : MainAxisAlignment.center,
+                  children : <Widget>[
+                    Text("Balance"),
+                    Container(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Consumer<Money>(
+                          builder: (context, money, _) => (
+                            Text(
+                              money.balance.toString(),
+                              style: TextStyle(
+                                color : Colors.purple,
+                                fontWeight : FontWeight.w700
+                              ),
+                            )
+                          ),
+                        ),
+                      ),
+                      height: 30,
+                      width: 150,
+                      margin : EdgeInsets.all(5),
+                      padding: EdgeInsets.all(5),
+                      decoration: BoxDecoration( // untuk mendekorasi Container
+                        color: Colors.purple[100],
+                        borderRadius: BorderRadius.circular(5),
+                        border: Border.all( // mengurusi border pada Container
+                          color: Colors.purple,
+                          width: 2
+                        ),
+                      ), 
+                    ),
+                  ],
+                ),
+                Container(
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Consumer<Cart>(
+                      builder: (context, cart, _) => Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Apple (500) x " + cart.quantity.toString(),
+                            style: TextStyle(
+                              color : Colors.black,
+                              fontWeight : FontWeight.w500
+                            ),
+                          ),
+                          Text(
+                           (500 * cart.quantity).toString(),
+                            style: TextStyle(
+                              color : Colors.black,
+                              fontWeight : FontWeight.w500
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  height: 30,
+                  margin : EdgeInsets.all(5),
+                  padding: EdgeInsets.all(5),
+                  decoration: BoxDecoration( // untuk mendekorasi Container
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all( // mengurusi border pada Container
+                      color: Colors.black,
+                      width: 2
+                    ),
+                  ), 
+                ),
+              ],
             ),
           ),
         ),
       ),
     );
   }
-}
-
-class MyClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    Path path = Path(); // Inisialisasi Path baru
-    path.lineTo(0, size.height); // tujuan pertama
-    // path.quadraticBezierTo(x1, y1, x2, y2); // x2 dan y2 adalah tujuan kedua 
-    // x1 dan y1 adalah titik kontrol jadi untuk melengkung kebawah jadi x => size.width / 2 dan y => size.height * 0,75
-    path.quadraticBezierTo(size.width / 2, size.height * 0.75, size.width, size.height);
-    path.lineTo(size.width, 0); // tujuan ketiga
-    path.close();
-    return path;
-  }
-
-  // mulai dari garis kiri atas ke bawah adalah mulai dari 0,0 ke tujuan 0,300
-  // kemudian tujuan ke dua yaitu garis bawah kiri ke kanan, dari 0,300 ke tujuan 300,300
-  // kemudian tujuan ke tiga yaitu garis kanan dari bawah ke atas dari 300,300 ke tujuan 300,0
-  // untuk penutup langsung path.close();
-
-  // 0,0----300,0
-  //  |       |
-  //  |       |
-  // 0,300---300,300
-  
-  @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }
 
 // https://i.pinimg.com/originals/96/37/49/963749a76357028fd70e54bccacffcba.jpg
@@ -187,7 +251,7 @@ class MyClipper extends CustomClipper<Path> {
 //   child: Container(
 //     color: Colors.blue,
 //     margin: EdgeInsets.all(10),
-//     decoration: BoxDecoration(
+//     decoration: BoxDecoration( // untuk mendekorasi Container Box
 //       color: Colors.blue // colors on container and on BoxDecoration are the same
 //       borderRadius: BorderRadius.circular(10),
 //       gradient: LinearGradient(
@@ -458,7 +522,7 @@ class MyClipper extends CustomClipper<Path> {
 
 // 1. Flexible Widget untuk flex
 
-// 2. align untuk positioning component
+// 2. align untuk positioning component terhadap Parent (Container/Stack)
 
 // class MyApp extends StatelessWidget {
 //   @override
@@ -1344,3 +1408,653 @@ class MyClipper extends CustomClipper<Path> {
 // --------------------------------------------------
 
 // HTTP REQUEST / KONEKSI KE API (POST METHOD)
+
+// POST API dari https://reqres.in/
+
+// Langkah-langkah 
+
+// 1. Membuat class terlebih dahulu sebagai model, untuk response result 
+// nanti akan di modelkan menjadi sebuah class
+
+// 2. Membuat factory method, method untuk memapping dari JSON Object ke class
+// yang telah dibuat
+
+// 3. Method untuk memanggil API
+
+// EXAMPLE on post_result_model.dart
+
+// import 'package:http/http.dart' as http;
+// import 'dart:convert' as convert;
+
+// // 1. Membuat class terlebih dahulu sebagai model, untuk response result dari API 
+// // nanti akan di modelkan menjadi sebuah class
+
+// class PostResult{
+//   String id;
+//   String name;
+//   String job;
+//   String created;
+
+//   PostResult({
+//     this.id, 
+//     this.name, 
+//     this.job, 
+//     this.created
+//   });
+
+//   // 2. Membuat factory method, method untuk memapping dari JSON Object dari RESPONSE RESULT 
+//   // ke class yang telah dibuat
+
+//   // dynamic karena bisa saja POST RESPONSE RESULT hasilnya selain String
+//   // createPostResult => sebenarnya bebas
+
+//   // isi object disesuaikan dengan RESPONSE RESULT dari API
+
+//   factory PostResult.createPostResult(Map<String, dynamic> object)
+//   {
+//     return PostResult(
+//       id: object['id'],
+//       name: object['name'],
+//       job: object['job'],
+//       created: object['createdAt'],
+//     );
+//   }
+
+//   // 3. Method untuk memanggil API
+
+//   // connectToAPI => sebenarnya bebas
+//   // String name, String job => parameter yang dibutuhkan/Request dari API untuk membuat User baru dan 
+//   // mendapat RESPONSE RESULT dari API
+
+//   static Future<PostResult> connectToAPI(String name, String job) async{
+//     String apiUrl = "https://reqres.in/api/users";
+    
+//     // body merupakan kumpulan parameter yang disesuaikan dengan JSON Request kemudian diinput 
+//     // dengan paramater yang sudah ditentukan
+
+//     // http POST merupakan method async dengan mengembalikan Future
+//     // RESPONSE RESULT dari API disimpan ke apiResult
+//     var apiResult = await http.post(apiUrl, body: {
+//       "name" : name,
+//       "job" : job
+//     });
+
+//     // apiResult belum berbentuk JSON, untuk mengubah ke JSON maka
+//     // perlu meng import 'dart:convert' as convert;
+//     // kemudian decode apiResult ke JSON
+
+//     var jsonObject = convert.jsonDecode(apiResult.body);
+
+//     // kemudian return gabungan dari 3 langkah
+//     // apiResult yang merupakan RESPONSE telah diubah menjadi JSON (jsonObject)
+//     // kemudian di mapping di factory Method => createPostResult
+//     // dan di Model Kan di class PostResult
+//     return PostResult.createPostResult(jsonObject); 
+//   }
+
+// }
+
+// on Main.dart
+
+// import 'package:my_first_flutter/post_result_model.dart';
+
+// void main() {
+//   runApp(MyApp());
+// }
+
+// class MyApp extends StatefulWidget {
+//   @override
+//   _MyAppState createState() => _MyAppState();
+// }
+
+// class _MyAppState extends State<MyApp> {
+//   PostResult postResult = null; inisialisasi PostResult dengan diisi dengan "null"
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       home: Scaffold(
+//         appBar: AppBar(title: Text("API Demo"),),
+//         body: Center(
+//           child: Column(
+//             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//             children: <Widget>[
+//               Text(
+//                 (postResult != null) ?
+//                 (
+//                   postResult.id +  // untuk memanggil component yang sudah di modelkan pada PostResult
+//                   " | " +
+//                   postResult.name +
+//                   " | " +
+//                   postResult.job +
+//                   " | " +
+//                   postResult.created
+//                 ) : (
+//                   "Tidak Ada Data"
+//                 ),
+//                 textAlign: TextAlign.center,
+//               ),
+//               RaisedButton(
+//                 onPressed: () {
+//                   PostResult
+//                     .connectToAPI("Dimas Agusta Wiranata", "Front Emd Developer") // Untuk memanggil PostResult.connectToAPI dan diisi Parameter yang di Request API untuk menghasilkan Response API
+//                     .then((value) // me Return hasil dari PostResult.connectToAPI yang telah menjadi JSON
+//                       {
+//                         setState(() {
+//                           postResult = value; 
+                              // Kemudian disimpan ke PostResult() postResult yang tadinya null dan 
+                              // di update state dengan setState(() {})
+//                         });
+//                       }
+//                     );
+//                 },
+//                 child: Text("POST/CREATE"),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// --------------------------------------------------
+
+// HTTP REQUEST / KONEKSI KE API (GET METHOD)
+
+// STEP - STEP sama seperti POST METHOD
+
+// Example on user_model.dart
+
+// import 'package:http/http.dart' as http;
+// import 'dart:convert' as convert;
+
+// class User{
+//   String id;
+//   String name;
+
+//   User({
+//     this.id,
+//     this.name
+//   });
+
+//   factory User.getUser(Map<String, dynamic> object){
+//     return User(
+//       id: object['id'].toString(),
+//       name: object['first_name'] + " " + object['last_name'],
+//     );
+//   }
+
+//   static Future<User> connectToAPI(String id) async{
+//     String apiUrl = "https://reqres.in/api/users/" + id;
+
+//     var apiResult = await http.get(apiUrl);
+
+//     var jsonObject = convert.jsonDecode(apiResult.body);
+
+//     // Karena Response dari API seperti
+//     // data : {
+//     //   "id" : "7",
+//     //   "email": "janet.weaver@reqres.in",
+//     //   "first_name": "Janet",
+//     //   "last_name": "Weaver",
+//     //   "avatar": "https://s3.amazonaws.com/uifaces/faces/twitter/josephstein/128.jpg"
+//     // }
+
+//     // Maka perlu ditambahkan line sbg berikut pada result yang sudah menjadi JSON(jsonObject) =>
+       // Karena Response yang diinginkan API berada di "data":[] 
+
+//     var userData = (jsonObject as Map<String, dynamic>)['data']; 
+
+//     return User.getUser(userData);
+//   }
+// }
+
+// on Main.dart
+
+// import 'package:my_first_flutter/post_result_model.dart';
+// import 'package:my_first_flutter/user_model.dart';
+
+// class MyApp extends StatefulWidget {
+//   @override
+//   _MyAppState createState() => _MyAppState();
+// }
+
+// class _MyAppState extends State<MyApp> {
+//   PostResult postResult = null;
+//   User user = null;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       home: Scaffold(
+//         appBar: AppBar(title: Text("API Demo"),),
+//         body: Center(
+//           child: Column(
+//             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//             children: <Widget>[
+//               Text(
+//                 (postResult  != null) ?
+//                 (
+//                   postResult.id + 
+//                   " | " +
+//                   postResult.name +
+//                   " | " +
+//                   postResult.job +
+//                   " | " +
+//                   postResult.created
+//                 ) : (
+//                   "Tidak Ada Data"
+//                 ),
+//                 textAlign: TextAlign.center,
+//               ),
+//               Text(
+//                 (user  != null) ?
+//                 (
+//                   user.id + 
+//                   " | " +
+//                   user.name 
+//                 ) : (
+//                   "Tidak Ada Data User"
+//                 ),
+//                 textAlign: TextAlign.center,
+//               ),
+//               RaisedButton(
+//                 onPressed: () {
+//                   PostResult
+//                     .connectToAPI("Dimas Agusta Wiranata", "Front Emd Developer")
+//                     .then((value) 
+//                       {
+//                         setState(() {
+//                           postResult = value;
+//                         });
+//                       }
+//                     );
+//                 },
+//                 child: Text("POST/CREATE"),
+//               ),
+//               RaisedButton(
+//                 onPressed: () {
+//                   User
+//                     .connectToAPI("2")
+//                     .then((value) 
+//                       {
+//                         setState(() {
+//                           user = value;
+//                         });
+//                       }
+//                     );
+//                 },
+//                 child: Text("GET"),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// --------------------------------------------------
+
+// HTTP REQUEST / KONEKSI KE API (LIST DATA)
+
+// on list_of_user.dart
+
+// import 'package:http/http.dart' as http;
+// import 'dart:convert' as convert;
+
+// class ListUser{
+//   String id;
+//   String name;
+
+//   ListUser({
+//     this.id,
+//     this.name
+//   });
+
+//   factory ListUser.createListUser(Map<String, dynamic> object){
+//     return ListUser(
+//       id: object['id'].toString(),
+//       name: object['first_name'] + " " + object['last_name'],
+//     );
+//   }
+
+//   static Future<List<ListUser>> getListUser(String page) async{
+//     String apiUrl = "https://reqres.in/api/users?page=" + page;
+
+//     var apiResult = await http.get(apiUrl);
+
+//     var jsonObject = convert.jsonDecode(apiResult.body);
+
+       // Karena Response dari API(jsonObject) seperti
+       // "data": [
+       //   {
+       //     "id": 7,
+       //     "email": "michael.lawson@reqres.in",
+       //     "first_name": "Michael",
+       //     "last_name": "Lawson",
+       //     "avatar": "https://s3.amazonaws.com/uifaces/faces/twitter/follettkyle/128.jpg"
+       //   },
+       //   {
+       //     "id": 8,
+       //     "email": "lindsay.ferguson@reqres.in",
+       //     "first_name": "Lindsay",
+       //     "last_name": "Ferguson",
+       //     "avatar": "https://s3.amazonaws.com/uifaces/faces/twitter/araa3185/128.jpg"
+       //   },
+       //   {
+       //     "id": 9,
+       //     "email": "tobias.funke@reqres.in",
+       //     "first_name": "Tobias",
+       //     "last_name": "Funke",
+       //     "avatar": "https://s3.amazonaws.com/uifaces/faces/twitter/vivekprvr/128.jpg"
+       //   },
+       //   {
+       //     "id": 10,
+       //     "email": "byron.fields@reqres.in",
+       //     "first_name": "Byron",
+       //     "last_name": "Fields",
+       //     "avatar": "https://s3.amazonaws.com/uifaces/faces/twitter/russoedu/128.jpg"
+       //   },
+       //   {
+       //     "id": 11,
+       //     "email": "george.edwards@reqres.in",
+       //     "first_name": "George",
+       //     "last_name": "Edwards",
+       //     "avatar": "https://s3.amazonaws.com/uifaces/faces/twitter/mrmoiree/128.jpg"
+       //   },
+       //   {
+       //     "id": 12,
+       //     "email": "rachel.howell@reqres.in",
+       //     "first_name": "Rachel",
+       //     "last_name": "Howell",
+       //     "avatar": "https://s3.amazonaws.com/uifaces/faces/twitter/hebertialmeida/128.jpg"
+       //   }
+       // ],  
+
+      // Maka perlu ditambahkan line sbg berikut pada result yang sudah menjadi JSON(jsonObject) =>
+      // Karena List Response yang diinginkan API berada di "data":[]
+
+//     List<dynamic> listUser = (jsonObject as Map<String, dynamic>)['data'];
+
+      // Buat List<ListUser> users = []; untuk menampung array List<dynamic> listUser dengan looping
+
+//     List<ListUser> users = [];
+//     for (int i = 0; i < listUser.length; i++)
+//       users.add(ListUser.createListUser(listUser[i]));
+    
+//     return users;
+//   }
+// }
+
+// on main.dart
+
+// import 'package:flutter/material.dart';
+// import 'package:my_first_flutter/list_of_user.dart';
+
+// void main() {
+//   runApp(MyApp());
+// }
+
+// class MyApp extends StatefulWidget {
+//   @override
+//   _MyAppState createState() => _MyAppState();
+// }
+
+// class _MyAppState extends State<MyApp> {
+//   String output = "No Data";
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       home: Scaffold(
+//         appBar: AppBar(title: Text("API Demo"),),
+//         body: Center(
+//           child: Column(
+//             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//             children: <Widget>[
+//               Text(
+//                 output,
+//                 textAlign: TextAlign.center,
+//               ),
+//               RaisedButton(
+//                 onPressed: () {
+//                   ListUser
+//                     .getListUser("2")
+//                     .then((value) {
+//                       output = "";
+//                       for (int i = 0; i < value.length; i++)
+//                         output = output + "[ " + value[i].name + " ]";
+//                       setState(() {});
+//                     }
+//                   );
+//                 },
+//                 child: Text("GET LIST DATA"),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// --------------------------------------------------
+
+// SHARED PREFERENCES & DOUBLE QUESTION MARK OPERATOR
+
+// Shared Preferences digunakan untuk menyimpan data simpel di Aplikasi.
+
+// 1. Daftarin dulu di pubspec.yaml shared_preferences: ^0.5.12 dan
+// import 'package:shared_preferences/shared_preferences.dart';
+
+// on React Js
+// localStorage.setItem('data', data);
+// localStorage.removeItem('data');
+// localStorage.getItem('data');
+
+// on React Native (async)
+// await AsyncStorage.setItem('data', data);
+// await AsyncStorage.removeItem('data');
+// await AsyncStorage.getItem('data');
+
+// import 'package:shared_preferences/shared_preferences.dart';
+
+// void main() {
+//   runApp(MyApp());
+// }
+
+// class MyApp extends StatefulWidget {
+//   @override
+//   _MyAppState createState() => _MyAppState();
+// }
+
+// class _MyAppState extends State<MyApp> {
+//   TextEditingController controller = TextEditingController(text: "No Name");
+//   bool isON = false;
+
+//   void saveData() async {
+//     SharedPreferences pref = await SharedPreferences.getInstance();
+//     pref.setString("nama", controller.text);
+//     pref.setBool("ison", isON);
+//   }
+
+//   Future<String> getNama() async {
+//     SharedPreferences pref = await SharedPreferences.getInstance();
+//     return pref.getString("nama") ?? "No Name"; // ?? Berarti jika yang direturn kosong maka mereturn "No Name"
+//   }
+
+//   Future<bool> getON() async {
+//     SharedPreferences pref = await SharedPreferences.getInstance();
+//     return pref.getBool("ison") ?? false; // ?? Berarti jika yang direturn kosong maka mereturn "No Name"
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       home: Scaffold(
+//         appBar: AppBar(title: Text("Shared Preference Example"),),
+//         body: Center(
+//           child: Column(
+//             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//             children: <Widget>[
+//               TextField(
+//                 controller: controller,
+//               ),
+//               Switch(
+//                 value: isON, 
+//                 onChanged: (newValue) {
+//                   setState(() {
+//                     isON = newValue;
+//                   });
+//                 },
+//               ),
+//               RaisedButton(
+//                 onPressed: () {
+//                   saveData();
+//                 },
+//                 child: Text("Save"),
+//               ),
+//               RaisedButton(
+//                 onPressed: () {
+//                   getNama().then((nama) {
+//                     controller.text = nama;
+//                     setState(() {});
+//                   });
+//                   getON().then((ison) {
+//                     isON = ison;
+//                     setState(() {});
+//                   });
+//                 },
+//                 child: Text("Load"),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// --------------------------------------------------
+
+// PROVIDER STATE MANAGEMENT
+
+// Hampir sama seperti Redux di react
+
+// StatefulWidget mempunyai kelemahan, jika menggunakan setState maka akan menggambar ulang keseluruhan
+// dari tree yang barada di StatefulWidget tersebut dan mempengaruhi performance dari Aplikasi 
+
+// Untuk mengubah beberapa Widget saja tanpa harus menggambar ulang semua Widget di StatefulWidget
+// Maka digunakanlah Provider
+
+// Cara Kerja
+
+// Tambahkan pada pubspec.yaml " provider: ^4.3.2+2 " dan import 'package:flutter/foundation.dart'; 
+// pada file ShareState yang akan berfungsi menyimpan state yang akan di pakai bareng2 pada State manapun
+// pada StatefulWidget/StatelessWidget agar tidak perlu menggambar ulang keseluruhan Widget 
+// dan tidak menyentuh widget yang tidak diperlu di gambar ulang
+
+// 1. Membuat file baru (example : application_color.dart) dan class yang mengimplemen Change Notifier 
+// (untuk memberi tahu kepada class tersebut apabila dari perubahan dari Consumer)
+
+// 2. Buat Object setter getter pada class tersebut sesuai keperluan
+
+// import 'package:flutter/foundation.dart';
+// import 'package:flutter/material.dart';
+
+// class ApplicationColor with ChangeNotifier{
+//   bool _isLightBlue = true; // _ pada _isLightBlue berarti private
+
+//   // Buat setter getter
+//   bool get isLightBlue => _isLightBlue; // getter
+
+//   set isLightBlue(bool value){
+//     _isLightBlue = value;
+//     notifyListeners(); // function untuk memberi perintah ke Widget2/Consumer untuk menunggu 
+//     //update dari Application_color ini
+//   }
+
+//   // Kemudian membuat getter untuk mengembalikan Color sesuai hasil boolean _isLightBlue
+//   Color get color => (_isLightBlue) ? Colors.lightBlue : Colors.amber;
+// }
+
+// 3. Bungkus Scaffold dengan ChangeNotifierProvider yang akan menyediakan Object dari Share State
+
+// 4. Bungkus Widget2 yang perlu diubah state dengan Consumer untuk memberi tau Wodget tersebut apabila
+// ada perubahan dari state yang bersangkutan
+
+// import 'package:flutter/material.dart';
+// import 'package:my_first_flutter/application_color.dart';
+// import 'package:provider/provider.dart';
+
+// void main() {
+//   runApp(MyApp());
+// }
+
+// class MyApp extends StatefulWidget {
+//   @override
+//   _MyAppState createState() => _MyAppState();
+// }
+
+// class _MyAppState extends State<MyApp> {
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       home: ChangeNotifierProvider( // inisialisasi Provider dengan ChangeNotifierProvider
+//         create: (context) => ApplicationColor(), // create provider ApplicationColor() di lib/application_color.dart
+//         child: Scaffold(
+//           appBar: AppBar(
+//             title: Consumer<ApplicationColor>( // Wrap pada Consumer dan provider ApplicationColor() di lib/application_color.dart
+//               builder: (context, applicationColor,_) =>
+//               Text(
+//                 "Procider State Management",
+//                 style: TextStyle(color : applicationColor.color), // masukan method getter color yang mengembalikan Color di ApplicationColor()
+//               ),
+//             ),
+//           ),
+//           body: Center(
+//             child: Column(
+//               mainAxisAlignment: MainAxisAlignment.center,
+//               children: <Widget>[
+//                 Consumer<ApplicationColor>( // Wrap pada Consumer dan provider ApplicationColor() di lib/application_color.dart
+//                   builder: (context, applicationColor,_) =>
+//                   AnimatedContainer(
+//                     duration: Duration(milliseconds: 500),
+//                     height: 100,
+//                     width: 100,
+//                     margin: EdgeInsets.all(5),
+//                     color: applicationColor.color, // masukan method getter color yang mengembalikan Color di ApplicationColor()
+//                   ),
+//                 ),
+//                 Row(
+//                   mainAxisAlignment: MainAxisAlignment.center,
+//                   children: <Widget>[
+//                     Container(margin: EdgeInsets.all(5), child: Text("AB"),),
+//                     Consumer<ApplicationColor>(
+//                       builder: (context, applicationColor, _) =>
+//                       Switch(
+//                         value: applicationColor.isLightBlue, 
+//                         onChanged: (newValue){
+//                           applicationColor.isLightBlue = newValue;
+//                         }
+//                       ),
+//                     ),
+//                     Container(margin: EdgeInsets.all(5), child: Text("LB"),),
+//                   ],
+//                 ),
+//               ],
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// --------------------------------------------------
+
+// PROVIDER STATE MANAGEMENT ( MULTI PROVIDER )
+
+
