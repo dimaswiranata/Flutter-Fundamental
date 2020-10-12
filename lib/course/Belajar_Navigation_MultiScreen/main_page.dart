@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:my_first_flutter/main_page.dart';
+import 'package:my_first_flutter/course/Belajar_Navigation_MultiScreen/second_page.dart';
 
-class LoginPage extends StatelessWidget {
+class MainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
+        appBar: AppBar(title : Text("Main Page"),),
         body: Center(
           child: RaisedButton(
-            child: Text("Login"), 
+            child: Text("Go to second page"), 
             onPressed: () {
-              Navigator.pushReplacement(
+              Navigator.push(
                 context, 
                 MaterialPageRoute(
                   builder: 
                     (context) { 
-                      return MainPage();
+                      return SecondPage();
                     }
                 )
               );
