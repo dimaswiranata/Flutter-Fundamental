@@ -13,6 +13,9 @@
 // await AsyncStorage.removeItem('data');
 // await AsyncStorage.getItem('data');
 
+// ?? Mengecek state tsb Null atau Tidak, jika Null maka menjalan kondisi setelahnya
+// jika tidak maka menjalankan state yang sudah ada
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

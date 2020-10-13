@@ -25,14 +25,16 @@ class SingleUserCard extends StatelessWidget {
       child: Row(
         children: <Widget>[
           Container(
-              width: 75,
-              height: 75,
-              margin: EdgeInsets.only(right: 15),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  image: DecorationImage(
-                    image: NetworkImage(singleUser.avatar),
-                  ))),
+            width: 75,
+            height: 75,
+            margin: EdgeInsets.only(right: 15),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+              image: DecorationImage(
+                image: NetworkImage(singleUser.avatar),
+              )
+            )
+          ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
