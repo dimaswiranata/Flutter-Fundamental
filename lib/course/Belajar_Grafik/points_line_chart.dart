@@ -2,7 +2,7 @@
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/material.dart';
 import 'package:my_first_flutter/course/Belajar_Grafik/custom_circle_renderer.dart';
-
+import 'package:intl/intl.dart';
 
 class PointsLineChart extends StatefulWidget {
   @override
@@ -22,6 +22,7 @@ class _PointsLineChartState extends State<PointsLineChart> {
   };
   Graph _graph = Graph();
   double maxRange;
+  final _dateFormatter = DateFormat('dd MMM');
   Map<String, dynamic> result = {
     'success': true, 
     'message': '', 
@@ -155,6 +156,11 @@ class _PointsLineChartState extends State<PointsLineChart> {
       }
     }
     return strValue;
+  }
+
+  String _getDate(String dateParams) {
+    DateTime temp = DateTime.parse(dateParams);
+    return _dateFormatter.format(temp);
   }
 
   void _buildLineValue(List<List<GraphData>> allData) {
